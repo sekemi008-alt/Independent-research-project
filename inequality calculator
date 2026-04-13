@@ -1,0 +1,53 @@
+import random
+
+# create randomised population
+people = [random.randint(20000, 80000) for _ in range(300)]
+
+# probabilistic loan approval (more realistic)
+def approve_loans(data, threshold, bias_low=1.0):
+    approvals = []
+    for income in data:
+        # base probability around threshold
+        prob = (income - threshold) / 20000 + 0.5
+        prob = max(0, min(1, prob))
+
+        # apply bias against low-income group if needed
+        if income < 30000:
+            prob *= bias_low
+
+        approvals.append(1 if random.random() < prob else 0)
+    return approvals
+
+# inequality measure
+def inequality(data, approvals):
+    low = []
+    high = []
+    for i in range(len(data)):
+        if data[i] < 30000:
+            low.append(approvals[i])
+        else:
+            high.append(approvals[i])
+    low_rate = sum(low) / len(low)
+    high_rate = sum(high) / len(high)
+    return high_rate - low_rate
+
+# NORMAL period (fairer system)
+normal_approvals = approve_loans(people, 30000, bias_low=1.0)
+normal_gap = inequality(people, normal_approvals)
+
+# CRISIS period (stricter + biased system)
+crisis_people = []
+for income in people:
+    if income < 30000:
+        crisis_people.append(income * 0.7)  # bigger shock
+    else:
+        crisis_people.append(income * 0.9)  # smaller shock
+
+crisis_approvals = approve_loans(crisis_people, 35000, bias_low=0.6)
+crisis_gap = inequality(crisis_people, crisis_approvals)
+
+# display results
+print("Income Inequality Analysis")
+print(f"Normal inequality gap: {normal_gap:.4f}")
+print(f"Crisis inequality gap: {crisis_gap:.4f}")
+print(f"Increase in inequality: {((crisis_gap - normal_gap) / normal_gap * 100):.2f}%")
