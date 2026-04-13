@@ -1,1 +1,1 @@
-# Independent-research-project-2
+# Independent-research-project
